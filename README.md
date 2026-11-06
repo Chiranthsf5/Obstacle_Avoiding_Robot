@@ -124,49 +124,14 @@ Install the following library through **Sketch → Include Library → Manage Li
 7. Disconnect USB and power the robot through its battery supply.
 
 ## 🛠️ Troubleshooting
-
-### 1. Front Wheels Rotating in Opposite Directions
-
-- Check whether both front wheels rotate in the intended forward direction.
-- If one wheel rotates backward, interchange the positive and negative motor output connections for that motor at the L298N.
-- Verify the motor connections before testing autonomous movement.
-
-### 2. Robot Not Moving
-
-- Check the battery voltage.
-- Verify the L298N motor supply connections.
-- Check ENA and ENB connections.
-- Ensure the motor driver and ESP32 share a common ground.
-- If using ESP32 PWM control, remove the L298N ENA and ENB enable jumpers.
-
-### 3. Servo or Ultrasonic Sensor Not Working
-
-- Verify the servo signal connection to GPIO 18.
-- Check the 5V supply to the servo and HC-SR04.
-- Ensure all grounds are connected.
-- Verify the TRIG and ECHO connections.
-
-### 4. Buck Converter Output Issues
-
-- Measure the LM2596 output using a multimeter.
-- Adjust the potentiometer until the output is regulated to 5V.
-- Check the input battery connections and output wiring.
-
-### 5. Robot Turning Incorrectly
-
-- Turning duration depends on motor speed, wheel characteristics, chassis weight and battery condition.
-- Adjust the delay values in `turnLeft()` and `turnRight()` through trial and error.
-- Test both turning directions and tune the delays until the robot makes consistent turns.
-
-### 6. Obstacle Detection Issues
-
-- Check the ultrasonic sensor alignment.
-- Verify the ECHO voltage divider.
-- Adjust `STOP_DISTANCE` according to testing conditions.
-- Ensure the servo completes its movement before taking distance measurements.
-
----
-
+Troubleshooting and Root-Cause Analysis
+- Raspberry Pi Pico header soldering issue: Incorrect soldering alignment prevented proper board connections. Switched to an ESP32 development board with pre-soldered headers.
+- IR sensor calibration issue: The IR sensor modules did not provide reliable black-and-white surface detection for lane following. Suspected improper calibration and inconsistent sensor readings. Changed the project approach to obstacle avoidance.
+- Buck converter damage: Accidentally reversed the battery polarity while connecting the 7.4 V battery to the LM2596 input, damaging the converter. Replaced the buck converter.
+- ESP32 damage: Accidentally connected the ESP32 power supply to the wrong breadboard position, causing an incorrect connection between the 5 V and GND pins. The board stopped accepting firmware uploads and had to be replaced.
+- Servo motor failure: Hot glue entered the servo's internal gear mechanism while mounting the HC-SR04 sensor, causing it to jam. Replaced the servo motor.
+- Incorrect motor direction: During obstacle-avoidance testing, the robot turned in the opposite direction to the intended movement. Checked the motor connections and corrected the wiring at the motor driver outputs.
+- Power supply verification: Measured the LM2596 output using a multimeter after disconnecting the load and verified that it provided the required 5 V output.
 ## 🔄 Adjustable Parameters
 
 The following parameters can be modified in the source code:
