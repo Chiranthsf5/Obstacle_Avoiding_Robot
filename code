@@ -1,0 +1,134 @@
+#include <ESP32Servo.h>
+
+// L298N motor driver
+const int ENA = 32;
+const int IN1 = 25;
+const int IN2 = 26;
+const int ENB = 33;
+const int IN3 = 27;
+const int IN4 = 14;
+
+// HC-SR04 ultrasonic sensor
+const int TRIG = 5;
+const int ECHO = 19;
+
+// Servo
+const int SERVO_PIN = 18;
+Servo scanner;
+
+const int STOP_DISTANCE = 20;
+const int MOTOR_SPEED = 200;  // PWM: 0–255
+
+float readDistance() {
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+
+  long duration = pulseIn(ECHO, HIGH, 30000);
+
+  if (duration == 0) return 400;
+
+  return duration * 0.0343 / 2.0;
+}
+
+void stopMotors() {
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+}
+
+void forward() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+
+  analogWrite(ENA, MOTOR_SPEED);
+  analogWrite(ENB, MOTOR_SPEED);
+}
+
+void turnLeft() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+
+  analogWrite(ENA, MOTOR_SPEED);
+  analogWrite(ENB, MOTOR_SPEED);
+  delay(2500);
+  stopMotors();
+}
+
+void turnRight() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+
+  analogWrite(ENA, MOTOR_SPEED);
+  analogWrite(ENB, MOTOR_SPEED);
+  delay(1500);
+  stopMotors();
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+
+  scanner.attach(SERVO_PIN);
+  scanner.write(90);
+
+  stopMotors();
+  delay(1000);
+}
+
+void loop() {
+  scanner.write(90);
+  delay(150);
+
+  float front = readDistance();
+
+  Serial.print("Front: ");
+  Serial.println(front);
+
+  if (front > STOP_DISTANCE) {
+    forward();
+  } else {
+    stopMotors();
+    delay(300);
+
+    scanner.write(150);
+    delay(500);
+    float leftDistance = readDistance();
+
+    scanner.write(30);
+    delay(500);
+    float rightDistance = readDistance();
+
+    scanner.write(90);
+    delay(200);
+
+    Serial.print("Left: ");
+    Serial.print(leftDistance);
+    Serial.print(" cm | Right: ");
+    Serial.println(rightDistance);
+
+    if (leftDistance > rightDistance) {
+      turnLeft();
+    } else {
+      turnRight();
+    }
+
+    delay(200);
+  }
+}
